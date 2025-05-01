@@ -1,0 +1,25 @@
+{% extends 'base.html'%}
+{% load static %}
+{% block content %}
+<div>
+    <h1 class="text-center">Nastavení</h1>
+    {% include 'partials/messages.html' %}
+    <form action="{% url 'settings' %}" method="post" class="my-2">
+        {% csrf_token %}
+        <div class="card">
+            <div class="card-body">
+                {% for obj in settings %}
+                    <div class="form-group">
+                        <label for="name" class="font-weight-bolder">{{obj.name}}</label>
+                        <input type="text" name="{{obj.code}}" value="{{obj.value}}" class="form-control rounded-sm" required>
+                    </div>
+                {% endfor %}
+                <div class="text-center my-2">
+                    <button type="submit" class="btn btn-primary rounded-lg">Uložit</button>
+                </div>
+            </div>   
+        </div>
+
+    </form>
+</div>
+{% endblock %}

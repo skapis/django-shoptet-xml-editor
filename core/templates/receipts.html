@@ -1,0 +1,74 @@
+{% extends 'base.html'%}
+{% load static %}
+{% block content %}
+<h2 class="mb-2">Vytvoření XML pro naskladnění</h2>
+{% include 'partials/messages.html' %}
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" action="{% url 'receipts' %}">
+                    {% csrf_token %}
+                    <!-- Drag & drop zóna -->
+                    <div 
+                        id="dropZone" 
+                        class="border border-2 border-primary rounded p-4 text-center mb-3" 
+                        style="cursor: pointer; transition: background-color 0.2s;"
+                        onclick="document.getElementById('xmlFile').click();"
+                        ondragover="event.preventDefault(); this.classList.add('bg-light');"
+                        ondragleave="this.classList.remove('bg-light');"
+                        ondrop="handleDrop(event);"
+                    >
+                        <p class="mb-0" id="dropZoneText">Přetáhněte soubor sem nebo klikněte pro výběr XML</p>
+                    </div>
+
+                    <!-- Skrytý input, mimo layout -->
+                    <input 
+                        type="file" 
+                        id="xmlFile" 
+                        name="xml_file" 
+                        accept=".xml" 
+                        style="opacity: 0; position: absolute; z-index: -1;" 
+                        onchange="updateFileName()" 
+                    >
+
+                    <!-- Název souboru -->
+                    <div class="form-text mb-3" id="fileNameDisplay">Žádný soubor nevybrán</div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Zpracovat</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{ data }}
+
+<script>
+function updateFileName() {
+    const input = document.getElementById('xmlFile');
+    const display = document.getElementById('fileNameDisplay');
+    const text = document.getElementById('dropZoneText');
+    if (input.files.length > 0) {
+        const name = input.files[0].name;
+        display.textContent = name;
+        text.textContent = 'Soubor vybrán: ' + name;
+    } else {
+        display.textContent = 'Žádný soubor nevybrán';
+        text.textContent = 'Přetáhněte soubor sem nebo klikněte pro výběr XML';
+    }
+}
+
+function handleDrop(event) {
+    event.preventDefault();
+    const dropZone = document.getElementById('dropZone');
+    dropZone.classList.remove('bg-light');
+    const fileInput = document.getElementById('xmlFile');
+    if (event.dataTransfer.files.length > 0) {
+        fileInput.files = event.dataTransfer.files;
+        updateFileName();
+    }
+}
+</script>
+{% endblock %}
