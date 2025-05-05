@@ -118,7 +118,10 @@ def create_invoice_item_home_currency(root, item_data):
     stock_item_elem = add_element(stock_item, 'typ:stockItem')
     add_element(stock_item_elem, 'typ:ids', item_data['stockItemId'])
     
-    add_element(invoice_item, 'inv:code', item_data['code'])
+    # Add code only if it's not shipping or billing
+    if not any(prefix in item_data['code'] for prefix in ['SHIPPING', 'BILLING']):
+        add_element(invoice_item, 'inv:code', item_data['code'])
+    
     return invoice_item
 
 def create_invoice_item_foreign_currency(root, item_data):
@@ -165,7 +168,10 @@ def create_invoice_item_foreign_currency(root, item_data):
     stock_item_elem = add_element(stock_item, 'typ:stockItem')
     add_element(stock_item_elem, 'typ:ids', item_data['stockItemId'])
     
-    add_element(invoice_item, 'inv:code', item_data['code'])
+    # Add code only if it's not shipping or billing
+    if not any(prefix in item_data['code'] for prefix in ['SHIPPING', 'BILLING']):
+        add_element(invoice_item, 'inv:code', item_data['code'])
+    
     return invoice_item 
 
 def update_unit_prices(root, bank_id, account_no, bank_code, const_symbol, store_id, feed_url, hash, eur_rate):
@@ -194,6 +200,14 @@ def update_unit_prices(root, bank_id, account_no, bank_code, const_symbol, store
         '12': 'medium',
         '10': 'low',
     }
+
+    # Remove inv:code only for shipping and billing items
+    for invoice_item in root.findall('.//inv:invoiceItem', namespaces):
+        code_elem = invoice_item.find('inv:code', namespaces)
+        if code_elem is not None:
+            code_value = code_elem.text
+            if code_value and ('SHIPPING' in code_value or 'BILLING' in code_value):
+                delete_element(invoice_item, code_elem)
 
     # load XML feed
     xml_feed = fetch_and_parse_xml_feed(feed_url, hash)
