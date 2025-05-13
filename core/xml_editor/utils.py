@@ -5,7 +5,7 @@ import json
 import xmltodict
 import requests
 
-def fetch_and_parse_xml_feed(url: str, hash: str) -> dict:
+def fetch_and_parse_xml_feed(url: str, api_key: str) -> dict:
     """
     Fetches XML data from a given URL and converts it to a dictionary.
     
@@ -16,11 +16,9 @@ def fetch_and_parse_xml_feed(url: str, hash: str) -> dict:
         dict: The XML data converted to a dictionary.
     """
     try:
-        response = requests.get(url, params={'hash': hash})
+        response = requests.get(url, headers={'Authorization': api_key})
         response.raise_for_status()  # Raise an error for bad responses
-        xml_data = response.content
-        parsed_data = xmltodict.parse(xml_data)
-        return parsed_data['PRODUCTS']['PRODUCT']
+        return response.json()['data']
     except requests.exceptions.RequestException as e:
         print(f"Error fetching XML feed: {e}")
         return None
@@ -220,7 +218,6 @@ def update_unit_prices(root, bank_id, account_no, bank_code, const_symbol, store
             stock_item = stock_item.find('typ:stockItem', namespaces)
             stock_item_ids = stock_item.find('typ:ids', namespaces)
             if stock_item_ids is not None and '_' in stock_item_ids.text:
-                
                 # split stockItem ids by underscore
                 stock_item_ids_text = stock_item_ids.text.split('_')
                 home_currency = inv_item.find('inv:homeCurrency', namespaces)
@@ -230,7 +227,7 @@ def update_unit_prices(root, bank_id, account_no, bank_code, const_symbol, store
                 delete_element(inv_item.getparent(), inv_item)
                 
                 for stock_item_id in stock_item_ids_text:
-                    # find stockItem in XML feed by prodcut_id
+                    # find stockItem in XML feed by product_id
                     product_obj = next((item for item in xml_feed if item['PRODUCT_CODE'] == stock_item_id), None)
                     # create new invoiceItem
                     if product_obj is not None:
