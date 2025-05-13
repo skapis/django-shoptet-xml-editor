@@ -68,4 +68,4 @@ jobs:
         with:
           app-name: 'stampsczech'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_39A26520AF0A40D0AB627E4FA86EF956 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_159ACB27FB9A43A8B13485EFF897F880 }}
